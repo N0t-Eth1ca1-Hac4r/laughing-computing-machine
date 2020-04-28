@@ -1,7 +1,6 @@
 discord.py
 datetime
 requests
-json
 aiohttp
 websockets
 chardet
