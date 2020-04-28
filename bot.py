@@ -157,5 +157,3 @@ async def cov(ctx, country):
         if item['location'] == country:
             return await ctx.send(embed=discord.Embed(title='CoronaVirus Stat', description=f'Данные по {country}:\nУмерло: {item["deaths"]}\nВыздоровело: {item["recovered"]}\nЗаражено: {item["confirmed"]}'))
 
-
-client.run(cct)
