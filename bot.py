@@ -7,7 +7,7 @@ import json
 
 # Переменные (токен и префикс)
 prefix = '$'
-cct = open('token.txt', 'r').readline()
+token = os.environ.get('BOT_TOKEN')
 client = commands.Bot(command_prefix = prefix)
 client.remove_command('help')
 
