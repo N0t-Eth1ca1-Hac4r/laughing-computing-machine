@@ -94,11 +94,8 @@ async def help(ctx):
     emb.add_field(name='{}clear'.format(prefix), value='Очистка чата (only adm) ')
     emb.add_field(name='{}hello'.format(prefix), value='Приветствие бота ')
     emb.add_field(name='{}time'.format(prefix), value='Показывает время ')
-    emb.add_field(name='{}play [url youtube.com без скобок]'.format(prefix), value='Проигрывает музыку с Ютуба ')
     emb.add_field(name='{}servinfo '.format(prefix), value='Показывает информацию о сервере ')
     emb.add_field(name='{}cov [ваша страна по английски без скобок]'.format(prefix), value='Показывает статистику о COVID-19 в выбранной стране ')
-    emb.add_field(name='{}join '.format(prefix), value='Бот подсоединяется к голосовому каналу, к которому подключён пользователь, написавший команду (only adm) ')
-    emb.add_field(name='{}leave '.format(prefix), value='Бот отсоединяется от канала (only adm)')
     await ctx.send(embed = emb)
 
 # Время
