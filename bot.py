@@ -4,6 +4,7 @@ import datetime
 from discord.utils import get
 import requests
 import json
+import os
 
 # Переменные (токен и префикс)
 prefix = '$'
