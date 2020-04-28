@@ -1,5 +1,7 @@
 discord.py
-discord.py[voice]
 datetime
 requests
 json
+aiohttp
+websockets
+chardet
