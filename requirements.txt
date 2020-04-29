@@ -4,3 +4,5 @@ requests
 aiohttp
 websockets
 chardet
+youtube-dl
+
