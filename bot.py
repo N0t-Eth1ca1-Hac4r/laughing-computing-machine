@@ -19,7 +19,7 @@ async def on_member_join(member):
     channel = client.get_channel(704269121159692339)
     role = discord.utils.get(member.guild.roles, id = 704439326083383358)
     await member.add_roles(role)
-    await channel.send(embed = discord.Embed(description = f'Пользователь {member.mention} присоединился к нам!', color = 0x39d0d6))
+    await channel.send(embed = discord.Embed(description = f'Пользователь {member.mention} присоединился к нам! Напиши "$help" без кавычек!', color = 0x39d0d6))
 
 # Проверка работоспособности бота
 @client.event
