@@ -5,6 +5,7 @@ from discord.utils import get
 import requests
 import json
 import os
+import youtube_dl
 
 # Переменные (токен и префикс)
 prefix = '$'
@@ -19,7 +20,7 @@ async def on_member_join(member):
     channel = client.get_channel(704269121159692339)
     role = discord.utils.get(member.guild.roles, id = 704439326083383358)
     await member.add_roles(role)
-    await channel.send(embed = discord.Embed(description = f'Пользователь {member.mention} присоединился к нам! Напиши "$help" без кавычек!', color = 0x39d0d6))
+    await channel.send(embed = discord.Embed(description = f'Пользователь {member.mention} присоединился к нам!', color = 0x39d0d6))
 
 # Проверка работоспособности бота
 @client.event
@@ -28,6 +29,76 @@ async def on_ready():
     print('Bot is connected')
 
     await client.change_presence(status = discord.Status.online, activity = discord.Game('Detroit: Become Human'))
+
+# Ржака и другие Voice Chat
+
+# Join
+@client.command(pass_context = True)
+async def join(ctx):
+    global voice
+    channel = ctx.message.author.voice.channel
+    voice = get(client.voice_clients, guild = ctx.guild)
+
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        voice = await channel.connect()
+        await ctx.send(f'Бот присоединился к каналу: {channel}')
+
+# Leave
+@client.command(pass_context = True)
+async def leave(ctx):
+    channel = ctx.message.author.voice.channel
+    voice = get(client.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_connected():
+        await voice.disconnect()
+    else:
+        voice = await channel.connect()
+        await ctx.send(f'Бот отключился от канала: {channel}')
+
+# Музло
+@client.command(pass_context = True)
+async def play(ctx, url : str):
+    song_there = os.path.isfile('song.mp3')
+
+    try:
+        if song_there:
+            os.remove('song.mp3')
+            print('[log] Старый файл удален')
+    except PermissionError:
+        print('[log] Не удалось удалить файл')
+
+    await ctx.send('Пожалуйста ожидайте')
+
+    voice = get(client.voice_clients, guild = ctx.guild)
+
+    ydl_opts = {
+        'format' : 'bestaudio/best',
+        'postprocessors' : [{
+            'key' : 'FFmpegExtractAudio',
+            'preferredcodec' : 'mp3',
+            'preferredquality' : '192'
+        }],
+    }
+
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        print('[log] Загружаю музыку...')
+        ydl.download([url])
+
+    for file in os.listdir('./'):
+        if file.endswith('.mp3'):
+            name = file
+            print(f'[log] Переименовываю файл: {file}')
+            os.rename(file, 'song.mp3')
+
+    voice.play(discord.FFmpegPCMAudio('song.mp3'), after = lambda e: print(f'[log] {name}, музыка закончила свое проигрывание'))
+    voice.source = discord.PCMVolumeTransformer(voice.source)
+    voice.source.volume = 0.07
+
+    song_name = name.rsplit('-', 2)
+    await ctx.send(f'Сейчас проигрывает музыка: {song_name[0]}')
+
 
 # Команды с правами админа
 
@@ -94,8 +165,11 @@ async def help(ctx):
     emb.add_field(name='{}clear'.format(prefix), value='Очистка чата (only adm) ')
     emb.add_field(name='{}hello'.format(prefix), value='Приветствие бота ')
     emb.add_field(name='{}time'.format(prefix), value='Показывает время ')
+    emb.add_field(name='{}play [url youtube.com без скобок]'.format(prefix), value='Проигрывает музыку с Ютуба ')
     emb.add_field(name='{}servinfo '.format(prefix), value='Показывает информацию о сервере ')
     emb.add_field(name='{}cov [ваша страна по английски без скобок]'.format(prefix), value='Показывает статистику о COVID-19 в выбранной стране ')
+    emb.add_field(name='{}join '.format(prefix), value='Бот подсоединяется к голосовому каналу, к которому подключён пользователь, написавший команду (only adm) ')
+    emb.add_field(name='{}leave '.format(prefix), value='Бот отсоединяется от канала (only adm)')
     await ctx.send(embed = emb)
 
 # Время
