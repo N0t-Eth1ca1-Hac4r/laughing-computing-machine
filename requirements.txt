@@ -1,8 +1,7 @@
+youtube-dl
 discord.py
 datetime
 requests
 aiohttp
 websockets
 chardet
-youtube-dl
-
