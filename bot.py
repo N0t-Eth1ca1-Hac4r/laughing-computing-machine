@@ -29,6 +29,76 @@ async def on_ready():
 
     await client.change_presence(status = discord.Status.online, activity = discord.Game('Detroit: Become Human'))
 
+# Ржака и другие Voice Chat
+
+# Join
+@client.command(pass_context = True)
+async def join(ctx):
+    global voice
+    channel = ctx.message.author.voice.channel
+    voice = get(client.voice_clients, guild = ctx.guild)
+
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        voice = await channel.connect()
+        await ctx.send(f'Бот присоединился к каналу: {channel}')
+
+# Leave
+@client.command(pass_context = True)
+async def leave(ctx):
+    channel = ctx.message.author.voice.channel
+    voice = get(client.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_connected():
+        await voice.disconnect()
+    else:
+        voice = await channel.connect()
+        await ctx.send(f'Бот отключился от канала: {channel}')
+
+# Музло
+@client.command(pass_context = True)
+async def play(ctx, url : str):
+    song_there = os.path.isfile('song.mp3')
+
+    try:
+        if song_there:
+            os.remove('song.mp3')
+            print('[log] Старый файл удален')
+    except PermissionError:
+        print('[log] Не удалось удалить файл')
+
+    await ctx.send('Пожалуйста ожидайте')
+
+    voice = get(client.voice_clients, guild = ctx.guild)
+
+    ydl_opts = {
+        'format' : 'bestaudio/best',
+        'postprocessors' : [{
+            'key' : 'FFmpegExtractAudio',
+            'preferredcodec' : 'mp3',
+            'preferredquality' : '192'
+        }],
+    }
+
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        print('[log] Загружаю музыку...')
+        ydl.download([url])
+
+    for file in os.listdir('./'):
+        if file.endswith('.mp3'):
+            name = file
+            print(f'[log] Переименовываю файл: {file}')
+            os.rename(file, 'song.mp3')
+
+    voice.play(discord.FFmpegPCMAudio('song.mp3'), after = lambda e: print(f'[log] {name}, музыка закончила свое проигрывание'))
+    voice.source = discord.PCMVolumeTransformer(voice.source)
+    voice.source.volume = 0.07
+
+    song_name = name.rsplit('-', 2)
+    await ctx.send(f'Сейчас проигрывает музыка: {song_name[0]}')
+
+
 # Команды с правами админа
 
 # Очистка чата
@@ -157,5 +227,6 @@ async def cov(ctx, country):
     for item in json.loads(requests.get("http://covid2019-api.herokuapp.com/v2/current").text)['data']:
         if item['location'] == country:
             return await ctx.send(embed=discord.Embed(title='CoronaVirus Stat', description=f'Данные по {country}:\nУмерло: {item["deaths"]}\nВыздоровело: {item["recovered"]}\nЗаражено: {item["confirmed"]}'))
+
 
 client.run(str(token))
